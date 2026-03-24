@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduTrack.AI — Full System Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #000000;
+    --bg-card:   #0a0a0a;
+    --bg-panel:  #121212;
+    --border:    #1a1a1a;
+    --border-md: #2a2a2a;
+    --border-hi: #333333;
+    --green:     #00ff88;
+    --green-dim: #00cc6a;
+    --green-glow:rgba(0,255,136,0.12);
+    --green-bg:  rgba(0,255,136,0.06);
+    --red:       #ff4757;
+    --red-bg:    rgba(255,71,87,0.08);
+    --amber:     #f59e0b;
+    --amber-bg:  rgba(245,158,11,0.08);
+    --blue:      #3b82f6;
+    --blue-bg:   rgba(59,130,246,0.08);
+    --purple:    #a855f7;
+    --purple-bg: rgba(168,85,247,0.08);
+    --teal:      #14b8a6;
+    --teal-bg:   rgba(20,184,166,0.08);
+    --muted:     #6b7280;
+    --muted-hi:  #9ca3af;
+    --white:     #ffffff;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 48px 32px 80px;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+
+  /* ──────────────── HEADER ──────────────── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 16px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .logo-ring {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    border: 1.5px solid var(--green);
+    background: var(--green-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px var(--green-glow);
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--white);
+  }
+  .header-text h1 span { color: var(--green); }
+  .header-text p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 3px;
+    font-family: var(--mono);
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 48px;
+    padding: 12px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease infinite;
+  }
+  .status-bar .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .meta-items {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+  }
+  .meta-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .meta-item span { color: var(--muted-hi); }
+
+  /* ──────────────── SECTION LABEL ──────────────── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ──────────────── LAYER WRAPPER ──────────────── */
+  .layer {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 24px 20px;
+    margin-bottom: 16px;
+    position: relative;
+    animation: fadeUp 0.5s ease both;
+  }
+  .layer-badge {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    padding: 3px 14px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+  }
+  .layer-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding-top: 4px;
+  }
+
+  .layer-ui    { border-color: rgba(168,85,247,0.25); background: rgba(168,85,247,0.02); }
+  .layer-core  { border-color: rgba(245,158,11,0.25);  background: rgba(245,158,11,0.02); }
+  .layer-data  { border-color: rgba(20,184,166,0.25);  background: rgba(20,184,166,0.02); }
+  .layer-store { border-color: rgba(59,130,246,0.25);  background: rgba(59,130,246,0.02); }
+
+  .badge-ui    { color: var(--purple); background: rgba(168,85,247,0.1); }
+  .badge-core  { color: var(--amber);  background: rgba(245,158,11,0.1); }
+  .badge-data  { color: var(--teal);   background: rgba(20,184,166,0.1); }
+  .badge-store { color: var(--blue);   background: rgba(59,130,246,0.1); }
+
+  /* ──────────────── NODE GRID ──────────────── */
+  .node-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-5 { grid-template-columns: repeat(5, 1fr); }
+
+  /* ──────────────── NODE CARD ──────────────── */
+  .node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .node::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 10px 0 0 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .node:hover { transform: translateY(-2px); }
+  .node:hover::before { opacity: 1; }
+
+  .node-purple::before { background: var(--purple); }
+  .node-amber::before  { background: var(--amber);  }
+  .node-teal::before   { background: var(--teal);   }
+  .node-blue::before   { background: var(--blue);   }
+  .node-green::before  { background: var(--green);  }
+  .node-red::before    { background: var(--red);    }
+  .node-gray::before   { background: var(--muted);  }
+
+  .node:hover.node-purple { border-color: rgba(168,85,247,0.5); background: var(--purple-bg); }
+  .node:hover.node-amber  { border-color: rgba(245,158,11,0.5);  background: var(--amber-bg); }
+  .node:hover.node-teal   { border-color: rgba(20,184,166,0.5);  background: var(--teal-bg);  }
+  .node:hover.node-blue   { border-color: rgba(59,130,246,0.5);  background: var(--blue-bg);  }
+  .node:hover.node-green  { border-color: rgba(0,255,136,0.5);   background: var(--green-bg); }
+  .node:hover.node-red    { border-color: rgba(255,71,87,0.5);   background: var(--red-bg);   }
+  .node:hover.node-gray   { border-color: var(--border-hi); }
+
+  .node-icon {
+    font-size: 18px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .node-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .node-sub {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .node-tag {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .tag-purple { background: rgba(168,85,247,0.15); color: var(--purple); }
+  .tag-amber  { background: rgba(245,158,11,0.15);  color: var(--amber);  }
+  .tag-teal   { background: rgba(20,184,166,0.15);  color: var(--teal);   }
+  .tag-blue   { background: rgba(59,130,246,0.15);  color: var(--blue);   }
+  .tag-green  { background: rgba(0,255,136,0.15);   color: var(--green);  }
+  .tag-red    { background: rgba(255,71,87,0.15);   color: var(--red);    }
+  .tag-gray   { background: rgba(107,114,128,0.15); color: var(--muted-hi); }
+
+  /* ──────────────── ARROWS BETWEEN LAYERS ──────────────── */
+  .layer-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 4px 0;
+    height: 32px;
+  }
+  .arrow-line {
+    flex: 1;
+    max-width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+  }
+  .arrow-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .arrow-chevron {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--muted);
+  }
+  .arrow-chevron svg { display: block; }
+
+  /* ──────────────── WIN32 CALLOUT ──────────────── */
+  .callout {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: var(--bg-panel);
+    border: 1px dashed var(--border-md);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .callout-icon { font-size: 14px; }
+  .callout-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .callout-text code {
+    color: var(--amber);
+    background: rgba(245,158,11,0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* ──────────────── DEPLOY SECTION ──────────────── */
+  .deploy-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 8px;
+  }
+  .deploy-node {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    position: relative;
+  }
+  .deploy-node:hover {
+    border-color: var(--border-hi);
+  }
+  .deploy-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--muted);
+    flex-shrink: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .deploy-arrow-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .deploy-icon { font-size: 20px; margin-bottom: 6px; }
+  .deploy-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .deploy-sub {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ──────────────── DB SCHEMA ──────────────── */
+  .schema-section {
+    margin-top: 40px;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+  .schema-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .schema-table {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .schema-header {
+    padding: 12px 16px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .schema-header-icon { font-size: 14px; }
+  .schema-header-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .schema-fields {
+    padding: 8px 0;
+  }
+  .schema-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .schema-field:hover { background: var(--bg-panel); }
+  .field-key {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .field-pk { background: rgba(245,158,11,0.2); color: var(--amber); }
+  .field-fk { background: rgba(59,130,246,0.2);  color: var(--blue); }
+  .field-col { background: var(--border); color: var(--muted); }
+  .field-name { color: var(--white); flex: 1; }
+  .field-type { color: var(--muted); }
+
+  /* ──────────────── BADGES SECTION ──────────────── */
+  .badges-section {
+    margin-top: 40px;
+    animation: fadeUp 0.5s 0.6s ease both;
+  }
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .badge-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 14px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+  .badge-card:hover {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+  .badge-emoji { font-size: 28px; margin-bottom: 8px; display: block; }
+  .badge-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .badge-desc {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ──────────────── TECH STACK ──────────────── */
+  .stack-section {
+    margin-top: 40px;
+    animation: fadeUp 0.5s 0.7s ease both;
+  }
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .stack-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .stack-icon { font-size: 20px; flex-shrink: 0; }
+  .stack-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .stack-version {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ──────────────── FOOTER ──────────────── */
+  .footer {
+    margin-top: 60px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .footer a {
+    color: var(--green);
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ──────────────── ANIMATIONS ──────────────── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+    50%       { opacity: 0.6; box-shadow: 0 0 4px var(--green); }
+  }
+
+  .layer:nth-child(1) { animation-delay: 0.15s; }
+  .layer:nth-child(2) { animation-delay: 0.25s; }
+  .layer:nth-child(3) { animation-delay: 0.35s; }
+  .layer:nth-child(4) { animation-delay: 0.45s; }
+
+  /* ──────────────── TOOLTIP / EXPAND ──────────────── */
+  .node[data-detail]:hover .node-sub { color: var(--muted-hi); }
+
+  /* ──────────────── RESPONSIVE ──────────────── */
+  @media (max-width: 900px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-5 { grid-template-columns: repeat(2, 1fr); }
+    .badges-grid { grid-template-columns: repeat(2, 1fr); }
+    .stack-grid  { grid-template-columns: repeat(2, 1fr); }
+    .deploy-flow { flex-direction: column; }
+    .deploy-arrow { flex-direction: row; padding: 4px 0; }
+    .schema-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px 60px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ─── HEADER ─── -->
+  <div class="header">
+    <div class="logo-ring">📚</div>
+    <div class="header-text">
+      <h1>EduTrack<span>.AI</span></h1>
+      <p>// full system architecture</p>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span class="label">System Overview</span>
+    <div class="meta-items">
+      <span class="meta-item">Platform <span>Windows (WPF)</span></span>
+      <span class="meta-item">Runtime <span>.NET 10 / C# 13</span></span>
+      <span class="meta-item">Database <span>SQLite (EF Core 10)</span></span>
+      <span class="meta-item">Version <span>v1.0.0</span></span>
+    </div>
+  </div>
+
+  <!-- ─── LAYER 1: UI ─── -->
+  <div class="section-label">Architecture layers</div>
+
+  <div class="layer layer-ui">
+    <span class="layer-badge badge-ui">UI Layer — EduTrackAI.UI</span>
+    <div class="layer-sub" style="margin-top:8px">WPF desktop application · XAML + C# · dark theme #000000 / #00ff88</div>
+
+    <div class="node-grid grid-4" style="margin-bottom:12px">
+
+      <div class="node node-purple" onclick="ping(this)" title="Main dashboard window">
+        <span class="node-icon">🖥️</span>
+        <div class="node-title">MainWindow</div>
+        <div class="node-sub">Dashboard · session timer · 7-day focus chart · activity log</div>
+        <span class="node-tag tag-purple">XAML</span>
+      </div>
+
+      <div class="node node-purple" onclick="ping(this)" title="Parent-locked settings">
+        <span class="node-icon">⚙️</span>
+        <div class="node-title">SettingsWindow</div>
+        <div class="node-sub">App classification config · badge thresholds · email setup</div>
+        <span class="node-tag tag-purple">XAML</span>
+      </div>
+
+      <div class="node node-purple" onclick="ping(this)" title="Study timetable manager">
+        <span class="node-icon">📅</span>
+        <div class="node-title">ScheduleWindow</div>
+        <div class="node-sub">Weekly study timetable · ScheduleEditorDialog for add/edit</div>
+        <span class="node-tag tag-purple">XAML</span>
+      </div>
+
+      <div class="node node-gray" onclick="ping(this)" title="Auth dialogs">
+        <span class="node-icon">🔐</span>
+        <div class="node-title">Auth Dialogs</div>
+        <div class="node-sub">OtpVerification · PasswordVerification · ParentPassword · PasswordChange</div>
+        <span class="node-tag tag-gray">Dialogs</span>
+      </div>
+
+    </div>
+
+    <div class="node-grid grid-3">
+
+      <div class="node node-teal" onclick="ping(this)">
+        <span class="node-icon">🏆</span>
+        <div class="node-title">BadgeDisplayControl</div>
+        <div class="node-sub">Custom UserControl — badge gallery with earned / locked states and 8 badge PNGs</div>
+        <span class="node-tag tag-teal">Control</span>
+      </div>
+
+      <div class="node node-teal" onclick="ping(this)">
+        <span class="node-icon">🔔</span>
+        <div class="node-title">NotificationService</div>
+        <div class="node-sub">Windows toast notifications for break reminders and distraction warnings</div>
+        <span class="node-tag tag-teal">Service</span>
+      </div>
+
+      <div class="node node-green" onclick="ping(this)">
+        <span class="node-icon">📊</span>
+        <div class="node-title">LiveCharts.Wpf</div>
+        <div class="node-sub">Animated ColumnSeries bar chart — crystal green gradient, 7-day focus % per day</div>
+        <span class="node-tag tag-green">NuGet</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Arrow UI → Core -->
+  <div class="layer-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-chevron">
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+        <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="arrow-label">calls services</span>
+    </div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- ─── LAYER 2: CORE ─── -->
+  <div class="layer layer-core">
+    <span class="layer-badge badge-core">Core Layer — EduTrackAI.Core</span>
+    <div class="layer-sub" style="margin-top:8px">Pure business logic · no UI, no database dependencies · fully testable</div>
+
+    <div class="node-grid grid-3" style="margin-bottom:12px">
+
+      <div class="node node-amber" onclick="ping(this)">
+        <span class="node-icon">👁️</span>
+        <div class="node-title">AppMonitorService</div>
+        <div class="node-sub">Polls active window every 1 sec via Win32 API · fires AppChanged and DistractionDetected events</div>
+        <span class="node-tag tag-amber">Service</span>
+      </div>
+
+      <div class="node node-amber" onclick="ping(this)">
+        <span class="node-icon">🤖</span>
+        <div class="node-title">AppClassifier</div>
+        <div class="node-sub">Keyword-based rule engine · Study / Distraction / Neutral · supports custom app lists from DB</div>
+        <span class="node-tag tag-amber">AI Engine</span>
+      </div>
+
+      <div class="node node-gray" onclick="ping(this)">
+        <span class="node-icon">📦</span>
+        <div class="node-title">Models</div>
+        <div class="node-sub">Student · StudySession · AppActivity · AppSettings · Badge · ParentSettings · StudySchedule · WeeklyReportData</div>
+        <span class="node-tag tag-gray">POCO</span>
+      </div>
+
+    </div>
+
+    <div class="callout">
+      <span class="callout-icon">⚡</span>
+      <span class="callout-text">
+        <code>user32.dll</code> P/Invoke — <code>GetForegroundWindow()</code> → <code>GetWindowThreadProcessId()</code> → <code>Process.GetProcessById()</code> → process name → classify
+      </span>
+    </div>
+  </div>
+
+  <!-- Arrow Core → Data -->
+  <div class="layer-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-chevron">
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+        <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="arrow-label">persists data</span>
+    </div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- ─── LAYER 3: DATA ─── -->
+  <div class="layer layer-data">
+    <span class="layer-badge badge-data">Data Layer — EduTrackAI.Data</span>
+    <div class="layer-sub" style="margin-top:8px">Entity Framework Core 10 · SQLite · migrations · all async</div>
+
+    <div class="node-grid grid-3" style="margin-bottom:12px">
+
+      <div class="node node-teal" onclick="ping(this)">
+        <span class="node-icon">🗄️</span>
+        <div class="node-title">EduTrackDbContext</div>
+        <div class="node-sub">7 DbSets · cascade deletes · indexed by StartTime + AppName · stored in AppData\Roaming\EduTrackAI\</div>
+        <span class="node-tag tag-teal">EF Core</span>
+      </div>
+
+      <div class="node node-teal" onclick="ping(this)">
+        <span class="node-icon">🏅</span>
+        <div class="node-title">BadgeManager</div>
+        <div class="node-sub">Checks 8 badge conditions on every session end · fires BadgeEarned event · supports monthly resets</div>
+        <span class="node-tag tag-teal">Service</span>
+      </div>
+
+      <div class="node node-teal" onclick="ping(this)">
+        <span class="node-icon">📄</span>
+        <div class="node-title">ReportGenerator</div>
+        <div class="node-sub">Collects 7-day session + activity data · builds WeeklyReportData · renders multi-page PDF via QuestPDF</div>
+        <span class="node-tag tag-teal">Service</span>
+      </div>
+
+    </div>
+
+    <div class="node-grid grid-3">
+
+      <div class="node node-gray" onclick="ping(this)">
+        <span class="node-icon">📧</span>
+        <div class="node-title">EmailService</div>
+        <div class="node-sub">Weekly report + OTP emails · MailKit · Gmail SMTP (port 587 / StartTLS)</div>
+        <span class="node-tag tag-gray">MailKit</span>
+      </div>
+
+      <div class="node node-gray" onclick="ping(this)">
+        <span class="node-icon">🔑</span>
+        <div class="node-title">CredentialManager</div>
+        <div class="node-sub">Stores parent email + hashed password · generates and validates OTP for password reset</div>
+        <span class="node-tag tag-gray">Security</span>
+      </div>
+
+      <div class="node node-gray" onclick="ping(this)">
+        <span class="node-icon">🗓️</span>
+        <div class="node-title">ScheduleManager</div>
+        <div class="node-sub">CRUD for weekly study schedules · returns today's scheduled blocks for reminder logic</div>
+        <span class="node-tag tag-gray">Service</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Arrow Data → Storage -->
+  <div class="layer-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-chevron">
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+        <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="arrow-label">reads / writes</span>
+    </div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- ─── LAYER 4: STORAGE + EXTERNAL ─── -->
+  <div class="layer layer-store">
+    <span class="layer-badge badge-store">Storage + External Services</span>
+    <div class="layer-sub" style="margin-top:8px">Local file system · external email provider</div>
+
+    <div class="node-grid grid-3">
+
+      <div class="node node-blue" onclick="ping(this)">
+        <span class="node-icon">💾</span>
+        <div class="node-title">SQLite Database</div>
+        <div class="node-sub">
+          <code style="font-size:10px; color:var(--blue)">%APPDATA%\EduTrackAI\edutrack.db</code><br/>
+          Auto-created on first launch · 5 EF migrations · no server required
+        </div>
+        <span class="node-tag tag-blue">Local</span>
+      </div>
+
+      <div class="node node-blue" onclick="ping(this)">
+        <span class="node-icon">📑</span>
+        <div class="node-title">PDF Report File</div>
+        <div class="node-sub">Generated by QuestPDF Community · saved to temp path · attached to parent email or opened locally</div>
+        <span class="node-tag tag-blue">QuestPDF</span>
+      </div>
+
+      <div class="node node-red" onclick="ping(this)">
+        <span class="node-icon">✉️</span>
+        <div class="node-title">Gmail SMTP</div>
+        <div class="node-sub">Parent weekly report + OTP delivery · smtp.gmail.com:587 · StartTLS · app password required</div>
+        <span class="node-tag tag-red">External</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── DEPLOY PIPELINE ─── -->
+  <div style="margin-top:48px; animation: fadeUp 0.5s 0.4s ease both;">
+    <div class="section-label">Portfolio deploy pipeline</div>
+
+    <div class="deploy-flow">
+
+      <div class="deploy-node">
+        <div class="deploy-icon">📁</div>
+        <div class="deploy-title">Source files</div>
+        <div class="deploy-sub">index.html · css/styles.css · js/main.js · pages/*.html</div>
+        <span class="node-tag tag-gray" style="margin-top:10px;display:inline-block">HTML / CSS / JS</span>
+      </div>
+
+      <div class="deploy-arrow">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+          <path d="M1 6H15M10 1L15 6L10 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="deploy-arrow-label">git push</div>
+      </div>
+
+      <div class="deploy-node">
+        <div class="deploy-icon">🐙</div>
+        <div class="deploy-title">GitHub Repo</div>
+        <div class="deploy-sub">codePR-26/edutrack-ai · public · main branch · SHA256 verified EXE in Releases</div>
+        <span class="node-tag tag-purple" style="margin-top:10px;display:inline-block">v1.0.0</span>
+      </div>
+
+      <div class="deploy-arrow">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+          <path d="M1 6H15M10 1L15 6L10 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="deploy-arrow-label">webhook · auto</div>
+      </div>
+
+      <div class="deploy-node">
+        <div class="deploy-icon">▲</div>
+        <div class="deploy-title">Vercel CI/CD</div>
+        <div class="deploy-sub">Auto-triggered on every push · builds in ~30 sec · zero config · free tier</div>
+        <span class="node-tag tag-teal" style="margin-top:10px;display:inline-block">CI/CD</span>
+      </div>
+
+      <div class="deploy-arrow">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+          <path d="M1 6H15M10 1L15 6L10 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="deploy-arrow-label">live</div>
+      </div>
+
+      <div class="deploy-node" style="border-color: rgba(0,255,136,0.3); background: var(--green-bg);">
+        <div class="deploy-icon">🌐</div>
+        <div class="deploy-title" style="color:var(--green)">Live Portfolio</div>
+        <div class="deploy-sub">edutrack-ai-xi.vercel.app · global CDN · HTTPS · auto-renewing SSL</div>
+        <span class="node-tag tag-green" style="margin-top:10px;display:inline-block">LIVE</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── DATABASE SCHEMA ─── -->
+  <div class="schema-section">
+    <div class="section-label">Database schema — SQLite via EF Core</div>
+    <div class="schema-grid">
+
+      <div class="schema-table">
+        <div class="schema-header">
+          <span class="schema-header-icon">👤</span>
+          <span class="schema-header-name">Students</span>
+          <span class="node-tag tag-amber" style="margin-left:auto">root entity</span>
+        </div>
+        <div class="schema-fields">
+          <div class="schema-field"><span class="field-key field-pk">PK</span><span class="field-name">Id</span><span class="field-type">int</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">StudentName</span><span class="field-type">string</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">TotalStudyHours</span><span class="field-type">double</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">CreatedDate</span><span class="field-type">DateTime</span></div>
+        </div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-header">
+          <span class="schema-header-icon">⏱️</span>
+          <span class="schema-header-name">StudySessions</span>
+          <span class="node-tag tag-blue" style="margin-left:auto">↳ Student</span>
+        </div>
+        <div class="schema-fields">
+          <div class="schema-field"><span class="field-key field-pk">PK</span><span class="field-name">Id</span><span class="field-type">int</span></div>
+          <div class="schema-field"><span class="field-key field-fk">FK</span><span class="field-name">StudentId</span><span class="field-type">int</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">StartTime</span><span class="field-type">DateTime</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">FocusScore</span><span class="field-type">double</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">DistractionsBlocked</span><span class="field-type">int</span></div>
+        </div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-header">
+          <span class="schema-header-icon">📱</span>
+          <span class="schema-header-name">AppActivities</span>
+          <span class="node-tag tag-blue" style="margin-left:auto">↳ StudySession</span>
+        </div>
+        <div class="schema-fields">
+          <div class="schema-field"><span class="field-key field-pk">PK</span><span class="field-name">Id</span><span class="field-type">int</span></div>
+          <div class="schema-field"><span class="field-key field-fk">FK</span><span class="field-name">SessionId</span><span class="field-type">int</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">AppName</span><span class="field-type">string</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">Category</span><span class="field-type">AppCategory</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">DurationSeconds</span><span class="field-type">int</span></div>
+        </div>
+      </div>
+
+      <div class="schema-table">
+        <div class="schema-header">
+          <span class="schema-header-icon">🏅</span>
+          <span class="schema-header-name">Badges</span>
+          <span class="node-tag tag-blue" style="margin-left:auto">↳ Student</span>
+        </div>
+        <div class="schema-fields">
+          <div class="schema-field"><span class="field-key field-pk">PK</span><span class="field-name">Id</span><span class="field-name">int</span></div>
+          <div class="schema-field"><span class="field-key field-fk">FK</span><span class="field-name">StudentId</span><span class="field-type">int</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">BadgeType</span><span class="field-type">enum</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">IsEarned</span><span class="field-type">bool</span></div>
+          <div class="schema-field"><span class="field-key field-col">—</span><span class="field-name">EarnedDate</span><span class="field-type">DateTime?</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── BADGES ─── -->
+  <div class="badges-section">
+    <div class="section-label">Achievement badges (8 total)</div>
+    <div class="badges-grid">
+      <div class="badge-card"><span class="badge-emoji">⏰</span><div class="badge-name">Hours Champion</div><div class="badge-desc">10 / 50 / 100 / 500 study hours</div></div>
+      <div class="badge-card"><span class="badge-emoji">🔥</span><div class="badge-name">Focus Streak</div><div class="badge-desc">7 / 14 / 30 consecutive study days</div></div>
+      <div class="badge-card"><span class="badge-emoji">🎯</span><div class="badge-name">Focus Master</div><div class="badge-desc">High focus score in a single session</div></div>
+      <div class="badge-card"><span class="badge-emoji">⛔</span><div class="badge-name">Distraction Free</div><div class="badge-desc">30+ continuous distraction-free minutes</div></div>
+      <div class="badge-card"><span class="badge-emoji">🌅</span><div class="badge-name">Early Bird</div><div class="badge-desc">Start a session before 8 AM</div></div>
+      <div class="badge-card"><span class="badge-emoji">🌙</span><div class="badge-name">Night Owl</div><div class="badge-desc">Study session after 10 PM</div></div>
+      <div class="badge-card"><span class="badge-emoji">⚔️</span><div class="badge-name">Weekend Warrior</div><div class="badge-desc">Sessions on both Sat and Sun</div></div>
+      <div class="badge-card"><span class="badge-emoji">👑</span><div class="badge-name">Grand Badge</div><div class="badge-desc">Earn all other badge types</div></div>
+    </div>
+  </div>
+
+  <!-- ─── TECH STACK ─── -->
+  <div class="stack-section">
+    <div class="section-label">Tech stack</div>
+    <div class="stack-grid">
+      <div class="stack-item"><span class="stack-icon">🔷</span><div><div class="stack-name">C# 13 / .NET 10</div><div class="stack-version">Language + runtime</div></div></div>
+      <div class="stack-item"><span class="stack-icon">🪟</span><div><div class="stack-name">WPF</div><div class="stack-version">Windows Presentation Foundation · XAML</div></div></div>
+      <div class="stack-item"><span class="stack-icon">🗄️</span><div><div class="stack-name">Entity Framework Core 10</div><div class="stack-version">ORM · SQLite provider · 5 migrations</div></div></div>
+      <div class="stack-item"><span class="stack-icon">📊</span><div><div class="stack-name">LiveCharts.Wpf 0.9.7</div><div class="stack-version">Animated focus trend chart</div></div></div>
+      <div class="stack-item"><span class="stack-icon">📄</span><div><div class="stack-name">QuestPDF (Community)</div><div class="stack-version">Weekly PDF report generation</div></div></div>
+      <div class="stack-item"><span class="stack-icon">📬</span><div><div class="stack-name">MailKit 4.9.0</div><div class="stack-version">Email delivery · SMTP / StartTLS</div></div></div>
+    </div>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <div class="footer">
+    <p>EduTrack.AI · <a href="https://edutrack-ai-xi.vercel.app" target="_blank">edutrack-ai-xi.vercel.app</a> · <a href="https://github.com/codePR-26/edutrack-ai" target="_blank">github.com/codePR-26/edutrack-ai</a></p>
+    <p style="margin-top:8px; font-size:10px;">SHA256 · EduTrackAI_Setup_v1.0.0.exe · 6295ee9183fbd453341dc0f11db020777ccf343f772d1f891f54a48a8b0ed073</p>
+  </div>
+
+</div>
+
+<script>
+  function ping(el) {
+    el.style.transition = 'transform 0.08s ease';
+    el.style.transform = 'scale(0.97)';
+    setTimeout(() => {
+      el.style.transform = '';
+    }, 120);
+  }
+</script>
+</body>
+</html>
