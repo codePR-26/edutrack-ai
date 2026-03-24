@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - EduTrack.AI</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="grid-background"></div>
+    
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo" style="text-decoration: none;">
+                <div class="logo-icon">ET</div>
+                <div class="logo-text">EduTrack.AI</div>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html#features">Features</a>
+                <a href="../index.html#demo">Demo</a>
+                <a href="../index.html#download">Download</a>
+            </div>
+        </div>
+    </nav>
+    
+    <section class="content-page">
+        <div class="content-container">
+            <h1 class="page-title">Contact Us</h1>
+            <p class="page-subtitle">Have questions? We'd love to hear from you!</p>
+            
+            <div class="contact-grid">
+                <div class="contact-methods">
+                    <div class="contact-card">
+                        <div class="contact-icon">📧</div>
+                        <h3>Email Support</h3>
+                        <p>For general inquiries and support questions</p>
+                        <a href="mailto:support@edutrack.ai" class="contact-link">support@edutrack.ai</a>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">💬</div>
+                        <h3>Live Chat</h3>
+                        <p>Get instant help from our support team</p>
+                        <button class="btn btn-secondary" onclick="alert('Live chat coming soon!')">Start Chat</button>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">🐦</div>
+                        <h3>Social Media</h3>
+                        <p>Follow us for updates and announcements</p>
+                        <div class="social-links-contact">
+                            <a href="#" class="social-btn">Twitter</a>
+                            <a href="#" class="social-btn">GitHub</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-container">
+                    <h2>Send Us a Message</h2>
+                    <form class="contact-form" onsubmit="handleContactSubmit(event)">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" required placeholder="Your name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" required placeholder="your@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select required>
+                                <option value="">Select a subject</option>
+                                <option value="support">Technical Support</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="billing">Billing Question</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea required rows="6" placeholder="Tell us how we can help..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <span>Send Message</span>
+                            <span>→</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <h3>What are your support hours?</h3>
+                        <p>Our email support team responds within 24 hours on business days. Live chat is available Monday-Friday, 9 AM - 5 PM EST.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>Do you offer phone support?</h3>
+                        <p>Currently, we provide support via email and live chat. Phone support is available for enterprise customers.</p>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <h3>How can I report a bug?</h3>
+                        <p>Please use the contact form above with "Bug Report" as the subject, or email us directly at support@edutrack.ai with details about the issue.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo-main">
+                        <div class="footer-logo-icon">ET</div>
+                        <div class="footer-logo-text">EduTrack.AI</div>
+                    </div>
+                    <p class="footer-description">Empowering students worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="../index.html#features">Features</a></li>
+                        <li><a href="../index.html#download">Download</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="privacy.html">Privacy</a></li>
+                        <li><a href="terms.html">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-left">
+                    <p>© 2026 EduTrack.AI. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../js/main.js"></script>
+    <script>
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+            e.target.reset();
+        }
+    </script>
+</body>
+</html>
